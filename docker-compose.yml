@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: office-energy/backend:latest
+    container_name: office_energy_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////app/data/office_energy.db
+      OFFICE_START_HOUR: "8"
+      OFFICE_END_HOUR: "18"
+      ALERT_WATT_THRESHOLD: "1500"
+      SIMULATION_INTERVAL_SECONDS: "5"
+      LOG_LEVEL: INFO
+    volumes:
+      - backend_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  discord:
+    build:
+      context: .
+      dockerfile: discord_bot/Dockerfile
+    image: office-energy/discord:latest
+    container_name: office_energy_discord
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      BACKEND_URL: http://backend:8000
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      LOG_LEVEL: INFO
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/web/Dockerfile
+      args:
+        API_BASE_URL: ${API_BASE_URL:-http://localhost:8000}
+        WS_URL: ${WS_URL:-ws://localhost:8000/ws}
+    image: office-energy/frontend:latest
+    container_name: office_energy_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  backend_data:

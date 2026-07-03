@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments / secrets
+.env
+*.env.local
+
+# SQLite
+*.db
+*.db-journal
+data/
+
+# Node / Flutter
+node_modules/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+frontend/web/build/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Docker
+**/*.log
+
+# Wokwi – never auto-generate this file
+wokwi.json
+wokwi.diagram.json

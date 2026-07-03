@@ -1,0 +1,13 @@
+**/.git
+**/.venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/build
+**/.dart_tool
+**/.idea
+**/.vscode
+**/*.db
+**/data
+README.md
+docs/screenshots

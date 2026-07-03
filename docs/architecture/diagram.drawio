@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="office-energy-monitor" version="22.0.0">
+  <diagram id="office-energy" name="Office Energy Monitoring Architecture">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Layer labels -->
+        <mxCell id="title" value="Office Energy Monitoring – System Architecture" style="text;html=1;align=center;verticalAlign=middle;fillColor=none;fontSize=22;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1520" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ESP32 hardware layer -->
+        <mxCell id="hw" value="ESP32 Hardware (3 rooms × 5 devices)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;fontColor=#f9fafb;fontSize=14;strokeColor=#374151" vertex="1" parent="1">
+          <mxGeometry x="60" y="120" width="380" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="esp32_0" value="ESP32 #0 – Drawing Room" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#e2e8f0;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="170" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="esp32_1" value="ESP32 #1 – Work Room 1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#e2e8f0;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="240" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="esp32_2" value="ESP32 #2 – Work Room 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#e2e8f0;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="310" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="relays" value="Relays · ACS712 current sense · 5V isolated PSU" style="text;html=1;align=center;fontSize=11;fillColor=none;fontColor=#cbd5f5" vertex="1" parent="1">
+          <mxGeometry x="80" y="370" width="340" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Backend -->
+        <mxCell id="api" value="FastAPI Backend (Python 3 · async)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0ea5e9;fontColor=#0b1220;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="540" y="120" width="500" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="rest" value="REST API&#10;/devices · /rooms · /alerts · /activities" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#082f49;fontColor=#e0f2fe;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="170" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ws" value="WebSocket /ws  (device updates, alerts)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#082f49;fontColor=#e0f2fe;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="240" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="sim" value="Simulation scheduler + Office-hours logic" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#082f49;fontColor=#e0f2fe;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="800" y="170" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc" value="Services · DeviceService · ActivityService · AlertService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#082f49;fontColor=#e0f2fe;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="800" y="240" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="db" value="SQLite (aiosqlite)&#10;devices · activities · alerts" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#facc15;fontColor=#1f2937;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="680" y="310" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Frontend -->
+        <mxCell id="fe" value="Flutter Web Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;fontColor=#f9fafb;fontSize=14;strokeColor=#334155" vertex="1" parent="1">
+          <mxGeometry x="60" y="500" width="500" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe_ws" value="RealtimeService (WebSocket)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#f9fafb;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="550" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe_api" value="ApiService (HTTP)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#f9fafb;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="620" width="220" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe_ui" value="Widgets — StatCard, RoomCard, DeviceTile,&#10;LivePowerChart, AlertList, ActivityFeed" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0f172a;fontColor=#f9fafb;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="320" y="550" width="220" height="130" as="geometry"/>
+        </mxCell>
+
+        <!-- Discord bot -->
+        <mxCell id="discord" value="Discord Bot (discord.py · httpx)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5865F2;fontColor=#ffffff;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1120" y="500" width="420" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="cmd" value="Commands — !status · !room · !usage · !alerts · !help" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4752c4;fontColor=#f1f5f9;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1140" y="550" width="380" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="client" value="BackendClient (HTTP → /api/v1/*)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4752c4;fontColor=#f1f5f9;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1140" y="620" width="380" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Users -->
+        <mxCell id="user_dash" value="Office Admin · Browser" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#a78bfa;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="220" y="430" width="50" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="user_disc" value="Discord User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#a78bfa;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="1280" y="430" width="50" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" style="endArrow=classic;html=1;strokeColor=#38bdf8" edge="1" parent="1" source="hw" target="api">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="JSON · WebSocket" style="endArrow=classic;html=1;strokeColor=#38bdf8;labelBackgroundColor=#0b1220;fillColor=#0b1220;fontColor=#38bdf8;fontSize=11" edge="1" parent="1" source="rest" target="hw">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="endArrow=classic;html=1;strokeColor=#22c55e" edge="1" parent="1" source="fe" target="api">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" value="WebSocket" style="endArrow=classic;html=1;strokeColor=#22c55e;labelBackgroundColor=#0b1220;fillColor=#0b1220;fontColor=#22c55e;fontSize=11" edge="1" parent="1" source="fe_ws" target="ws">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" value="REST" style="endArrow=classic;html=1;strokeColor=#a7f3d0;labelBackgroundColor=#0b1220;fillColor=#0b1220;fontColor=#a7f3d0;fontSize=11" edge="1" parent="1" source="fe_api" target="rest">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" value="REST" style="endArrow=classic;html=1;strokeColor=#cbd5f5;labelBackgroundColor=#0b1220;fillColor=#0b1220;fontColor=#cbd5f5;fontSize=11" edge="1" parent="1" source="discord" target="api">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" style="endArrow=none;html=1;strokeColor=#94a3b8" edge="1" parent="1" source="user_dash" target="fe">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" style="endArrow=none;html=1;strokeColor=#94a3b8" edge="1" parent="1" source="user_disc" target="discord">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#facc15" edge="1" parent="1" source="svc" target="db">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
