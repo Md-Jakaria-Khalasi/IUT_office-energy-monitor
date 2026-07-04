@@ -45,11 +45,14 @@ async def update_device(
 ) -> DeviceRead:
     service = DeviceService(session)
     try:
-        device = await service.set_status(device_id, payload.status)
+        device, changed = await service.set_status_with_change(device_id, payload.status)
         await session.commit()
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
 
     data = DeviceRead.model_validate(device)
-    await ws_manager.broadcast_device_update(data.model_dump())
+    # Only broadcast when the state actually changed; no-op PATCHes must NOT
+    # fan out (otherwise every refresh triggers a churn storm on clients).
+    if changed:
+        await ws_manager.broadcast_device_update(data.model_dump())
     return data

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Tuple
+from datetime import datetime, timezone
+from typing import Optional, Tuple
 
 from app.core.config import get_settings
 
@@ -16,7 +16,7 @@ def get_office_hours_window() -> Tuple[int, int]:
 
 def is_office_hours(now: Optional[datetime] = None) -> bool:
     """Return True if `now` (defaults to utcnow) is inside office hours."""
-    now = now or datetime.utcnow()
+    now = now or datetime.now(timezone.utc)
     start, end = get_office_hours_window()
     # weekday() == 0 means Monday; Saturday/Sunday are non-working days
     if now.weekday() >= 5:

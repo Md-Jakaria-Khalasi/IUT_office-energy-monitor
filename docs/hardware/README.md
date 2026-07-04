@@ -155,3 +155,62 @@ ESP-IDF sketch here). It must publish a JSON payload of the form:
 
 > Do **not** commit a generated `wokwi.json`. If you need a Wokwi diagram, open
 > Wokwi manually and re-create the wiring described above.
+
+---
+
+## 8. Simulation engine vs real hardware
+
+The backend has **two interchangeable telemetry sources**, and you can run
+either one, both, or switch between them without changing the dashboard.
+
+### 8.1 What the simulator does
+
+A background task in `backend/app/services/scheduler.py` (started from
+`app/main.py` at FastAPI startup) ticks every `SIMULATION_INTERVAL_SECONDS`
+(default `5`). Each tick:
+
+1. Reads every device from SQLite.
+2. For each device, decides an action based on the device's
+   `toggle_probability_office_hours` (or `_off_hours`) seed:
+   - **ON → OFF** when below threshold for >10 ticks.
+   - **OFF → ON** with a small probability per tick during office hours,
+     zero probability outside them.
+3. Updates `device.status`, `power_consumption`, `last_changed`.
+4. Logs an `Activity` row.
+5. Aggregates totals per room and the whole office.
+6. If the rolling average power over the last few ticks exceeds
+   `ALERT_WATT_THRESHOLD` (default `1500` W), inserts an `Alert` row and
+   broadcasts an `alert` event on `/ws`.
+7. Broadcasts a `simulation_tick` and `device_update` envelope on `/ws`.
+
+The gate is `OFFICE_START_HOUR` / `OFFICE_END_HOUR` (default `08`–`18`,
+Mon–Fri) in `backend/app/core/constants.py`. Outside office hours the
+simulator still ticks but only flips devices OFF, never ON.
+
+### 8.2 What the firmware does
+
+Each ESP32 in `firmware/esp32/` (placeholder) runs the same shape of
+loop **locally**:
+
+1. Reads relay status (GPIO) for the 5 devices in its room.
+2. Reads `ACS712` on ADC1_CH6 once per second, applies the `0.026 V → 5 V`
+   calibration, rounds to whole watts, clips to `0–5000 W`.
+3. Publishes the JSON payload documented in section 7 to
+   `office/<room>/<device>` (MQTT) **or** POSTs the same body to
+   `PATCH /api/v1/devices/{device_id}` on the FastAPI backend.
+
+The wire shape is identical; the backend cannot tell the difference
+between a simulator tick and a real firmware report — both end up as
+the same Pydantic-shaped device update row.
+
+### 8.3 How to switch between them
+
+| Mode                         | Set in `backend/.env`                                       | Effect on dashboard                                   |
+|------------------------------|------------------------------------------------------------|-------------------------------------------------------|
+| **Simulator only** (default) | `SIMULATION_ENABLED=true`, no MQTT broker required         | Devices toggle every 5 s, watts drift ±20% of nominal. |
+| **Firmware only**            | `SIMULATION_ENABLED=false`, set `MQTT_URL`, `MQTT_TOPIC`    | Backend ingests only ESP32 reports; no auto-toggling. |
+| **Hybrid (sim + firmware)**  | `SIMULATION_ENABLED=true`, ESP32 also reporting             | Firmware reports win when fresh; simulator keeps the rest of the room alive. |
+
+There is no `wokwi.json` committed. To prototype firmware without
+hardware, open Wokwi manually, paste the pin map from section 3, and
+point the firmware's MQTT / HTTP target at your local backend.

@@ -55,9 +55,21 @@ class Settings(BaseSettings):
     alert_watt_threshold: int = Field(default=1500)
     alert_off_hours_active: bool = Field(default=True)
 
-    # Discord Bot
-    discord_bot_token: str = Field(default="")
-    discord_api_base_url: str = Field(default="http://localhost:8000")
+    # Advanced alert engine tuning (PART 1)
+    cost_per_kwh_usd: float = Field(default=0.15, ge=0)
+    after_hours_grace_minutes: int = Field(default=5, ge=0)
+    room_continuous_threshold_minutes: int = Field(default=120, ge=1)
+    critical_power_threshold_w: int = Field(default=1500, ge=0)
+    critical_power_dwell_seconds: int = Field(default=30, ge=1)
+    office_consumption_threshold_kwh: float = Field(default=5.0, ge=0)
+    alert_warning_after_minutes: int = Field(default=30, ge=1)
+    alert_critical_after_minutes: int = Field(default=60, ge=1)
+    alert_max_after_minutes: int = Field(default=120, ge=1)
+    reminder_interval_minutes: int = Field(default=30, ge=1)
+    default_dismiss_duration_minutes: int = Field(default=30, ge=1)
+
+    # Logging
+    log_level: str = Field(default="INFO")
 
 
 @lru_cache

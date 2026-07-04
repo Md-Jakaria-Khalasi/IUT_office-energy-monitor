@@ -7,6 +7,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api import activities, alerts, devices, rooms, simulation
 from app.core.config import get_settings
@@ -68,6 +69,22 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["health"])
     async def health() -> dict:
         return {"status": "ok"}
+
+    @app.get("/healthz", tags=["health"])
+    async def healthz() -> dict:
+        """Alias used by Docker healthcheck and external monitors."""
+        return {"status": "ok"}
+
+    @app.get("/ready", tags=["health"])
+    async def ready() -> dict:
+        """Readiness probe: confirms DB is reachable."""
+        try:
+            async with AsyncSessionLocal() as session:
+                await session.execute(text("SELECT 1"))
+            return {"status": "ready"}
+        except Exception as exc:  # noqa: BLE001 - probe must never crash
+            logger.error(f"Readiness probe failed: {exc}")
+            return {"status": "degraded", "error": str(exc)}
 
     app.include_router(devices.router, prefix="/api/v1")
     app.include_router(rooms.router, prefix="/api/v1")

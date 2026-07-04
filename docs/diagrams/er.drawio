@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-04T16:30:00.000Z" agent="placeholder" version="24.0.0" type="device">
+  <diagram name="ER Diagram" id="er-diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="title" value="Office Energy Monitor — ER Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="devices" value="devices&#xa;&#xa;PK id&#xa;name&#xa;room&#xa;type&#xa;status&#xa;power_consumption&#xa;last_changed" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="120" y="120" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="activities" value="activities&#xa;&#xa;PK id&#xa;FK device_id&#xa;device_name&#xa;room&#xa;action&#xa;description&#xa;created_at" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="120" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="alerts" value="alerts&#xa;&#xa;PK id&#xa;severity&#xa;alert_type&#xa;status&#xa;message&#xa;room&#xa;FK device_id&#xa;involved_device_ids&#xa;involved_rooms&#xa;peak_power_w&#xa;created_at&#xa;acknowledged" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="780" y="120" width="220" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="d-a" value="device_id" style="endArrow=ERmany;html=1;rounded=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="devices" target="activities">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="d-b" value="device_id" style="endArrow=ERmany;html=1;rounded=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="devices" target="alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Three tables back the system:&#xa;• devices  -  the source of truth (15 rows seeded by the simulator)&#xa;• activities  -  append-only log of state changes (id-keyed)&#xa;• alerts  -  threshold &amp; after-hours alerts (id-keyed, de-duplicated per 60s)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="380" width="880" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="1" parent="1" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

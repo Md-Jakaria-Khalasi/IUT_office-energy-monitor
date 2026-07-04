@@ -47,10 +47,72 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Create tables if they do not exist yet."""
+    """Create tables if they do not exist yet, then sync any new columns.
+
+    ``Base.metadata.create_all`` is a no-op for tables that already exist, so
+    columns added to a model after the database was first created never appear
+    on disk. This helper performs a lightweight, idempotent ``ALTER TABLE``
+    pass for every column the model declares but the live schema lacks.
+    """
     # Import models so that they are registered on Base.metadata
     from app.models import activity, alert, device  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await _sync_schema(conn)
     logger.info("Database tables ensured.")
+
+
+async def _sync_schema(conn: "AsyncConnection") -> None:
+    """Add any columns missing from the live SQLite schema.
+
+    Safe to run repeatedly: each ``ALTER TABLE`` is skipped if the column
+    already exists. All new columns are created with SQLite's ``TEXT`` type —
+    SQLAlchemy's JSON/Integer/Boolean/Float/DateTime adapters happily round-trip
+    through text storage, which keeps the DDL portable and side-steps quirks
+    with ``column.type.compile(dialect=...)`` for ``JSON`` types.
+
+    Only additive migrations are performed; destructive changes (renames,
+    drops, type narrowing) still require a manual migration.
+    """
+    from sqlalchemy import text
+
+    type_default = {
+        "json": "'[]'",
+        "dict_json": "'{}'",
+        "integer": "0",
+        "boolean": "0",
+        "float": "0.0",
+        "datetime": "CURRENT_TIMESTAMP",
+    }
+
+    for table in Base.metadata.sorted_tables:
+        table_name = table.name
+        try:
+            existing = {
+                row[1]
+                for row in (
+                    await conn.execute(text(f'PRAGMA table_info("{table_name}")'))
+                ).fetchall()
+            }
+        except Exception:  # noqa: BLE001 - table may not exist yet
+            continue
+
+        for column in table.columns:
+            if column.name in existing:
+                continue
+
+            type_key = column.type.compile().__class__.__name__.lower()
+            default_sql = type_default.get(type_key, "''")
+            not_null = "" if column.nullable else " NOT NULL"
+            ddl = (
+                f'ALTER TABLE "{table_name}" ADD COLUMN "{column.name}" '
+                f"TEXT{not_null} DEFAULT {default_sql}"
+            )
+            try:
+                await conn.execute(text(ddl))
+                logger.info(f"Schema sync: added {table_name}.{column.name}")
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    f"Schema sync: could not add {table_name}.{column.name}: {exc}"
+                )

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
-from sqlalchemy import DateTime, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.constants import AlertSeverity, AlertStatus, AlertType
 from app.db.session import Base
 
 
@@ -16,14 +18,91 @@ class Alert(Base):
     __tablename__ = "alerts"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    severity: Mapped[str] = mapped_column(String(20), nullable=False, default="info")
-    message: Mapped[str] = mapped_column(Text, nullable=False)
-    room: Mapped[str] = mapped_column(String(50), nullable=True)
-    device_id: Mapped[int] = mapped_column(nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False, index=True
+
+    # Classification -----------------------------------------------------------
+    severity: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=AlertSeverity.INFO.value
     )
-    acknowledged: Mapped[bool] = mapped_column(default=False, nullable=False)
+    alert_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=AlertType.AFTER_HOURS_DEVICE.value
+    )
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=AlertStatus.ACTIVE.value
+    )
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Scope --------------------------------------------------------------------
+    room: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    device_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    involved_device_ids: Mapped[List[int]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    involved_rooms: Mapped[List[str]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    device_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    room_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    peak_power_w: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Lifecycle / timestamps ---------------------------------------------------
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+        index=True,
+    )
+    last_evaluated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    escalated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    # Acknowledgement ----------------------------------------------------------
+    acknowledged: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
+    )
+    acknowledged_by: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True
+    )
+
+    # Dismissal / snooze -------------------------------------------------------
+    dismissed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    dismissed_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True, index=True
+    )
+    dismissed_by: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+
+    # Energy impact ------------------------------------------------------------
+    energy_waste_kwh: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0
+    )
+    estimated_cost_usd: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0
+    )
+
+    # History / context --------------------------------------------------------
+    severity_history: Mapped[List[Dict[str, Any]]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    extra: Mapped[Dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default=dict
+    )
 
     def __repr__(self) -> str:
-        return f"<Alert id={self.id} severity={self.severity!r} room={self.room!r}>"
+        return (
+            f"<Alert id={self.id} type={self.alert_type!r} "
+            f"severity={self.severity!r} status={self.status!r} room={self.room!r}>"
+        )
+
+    # Convenience accessors ---------------------------------------------------
+    @property
+    def is_active(self) -> bool:
+        return self.status == AlertStatus.ACTIVE.value and not self.acknowledged
+
+    @property
+    def age_minutes(self) -> float:
+        delta = datetime.now(timezone.utc) - self.created_at
+        return max(0.0, delta.total_seconds() / 60.0)

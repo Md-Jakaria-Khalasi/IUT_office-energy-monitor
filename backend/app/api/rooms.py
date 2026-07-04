@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import db_session
@@ -13,6 +13,7 @@ from app.models.device import Device
 from app.schemas.device import OverviewStats, RoomSummary
 from app.services.alert_service import AlertService
 from app.services.device_service import DeviceService
+from app.websocket.manager import ws_manager
 from sqlalchemy import select
 
 
@@ -61,3 +62,45 @@ async def office_overview(session: AsyncSession = Depends(db_session)) -> Overvi
         rooms=rooms,
         active_alerts=await alert_service.active_count(),
     )
+
+
+def _resolve_room(room: str) -> RoomName:
+    """Map a path parameter into a known ``RoomName`` enum."""
+    try:
+        return RoomName(room)
+    except ValueError as exc:
+        valid = ", ".join(r.value for r in RoomName)
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"Unknown room '{room}'. Valid rooms: {valid}",
+        ) from exc
+
+
+@router.post("/{room}/all-on", response_model=Dict[str, Any])
+async def all_on(room: str, session: AsyncSession = Depends(db_session)) -> Dict[str, Any]:
+    """Turn every device in a room on. Idempotent and delta-only."""
+    target = _resolve_room(room)
+    service = DeviceService(session)
+    changed = await service.set_room_status(target.value, "on")
+    await session.commit()
+    payloads = [service.device_to_payload(d) for d in changed]
+    summary = await service.room_summary(target.value)
+    for payload in payloads:
+        await ws_manager.broadcast_device_update(payload)
+    await ws_manager.broadcast_room_power(summary)
+    return {"room": target.value, "changed": len(payloads), "devices": payloads, "summary": summary}
+
+
+@router.post("/{room}/all-off", response_model=Dict[str, Any])
+async def all_off(room: str, session: AsyncSession = Depends(db_session)) -> Dict[str, Any]:
+    """Turn every device in a room off. Idempotent and delta-only."""
+    target = _resolve_room(room)
+    service = DeviceService(session)
+    changed = await service.set_room_status(target.value, "off")
+    await session.commit()
+    payloads = [service.device_to_payload(d) for d in changed]
+    summary = await service.room_summary(target.value)
+    for payload in payloads:
+        await ws_manager.broadcast_device_update(payload)
+    await ws_manager.broadcast_room_power(summary)
+    return {"room": target.value, "changed": len(payloads), "devices": payloads, "summary": summary}

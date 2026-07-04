@@ -1,22 +1,26 @@
-# Python
+# ──────────────────────────── Python ────────────────────────────
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+backend/.venv/
 .pytest_cache/
+backend/.pytest_cache/
+backend/tests/.pytest_cache/
+discord_bot/.pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-# Environments / secrets
+# ──────────────────────────── Environments / secrets ────────────────────────────
 .env
 *.env.local
 
-# SQLite
+# ──────────────────────────── SQLite ────────────────────────────
 *.db
 *.db-journal
 data/
 
-# Node / Flutter
+# ──────────────────────────── Node / Flutter / Dart ────────────────────────────
 node_modules/
 .dart_tool/
 .flutter-plugins
@@ -25,21 +29,40 @@ node_modules/
 .pub-cache/
 .pub/
 build/
+frontend/build/
 frontend/web/build/
+frontend/.dart_tool/
+frontend/pubspec.lock
+# Legacy Flutter scaffolds kept during cleanup; safe to delete locally.
+frontend/lib_old/
+frontend/test_old/
 
-# Editors
+# ──────────────────────────── Editors / IDEs ────────────────────────────
 .idea/
+.idea/workspace.xml
 .vscode/
 *.swp
 *.swo
 .DS_Store
+*.iml
+.metadata
+# VS Code Puku agent embeddings cache (regenerated on demand).
+.puku/
+.puku/*
 
-# OS
+# ──────────────────────────── OS ────────────────────────────
 Thumbs.db
+desktop.ini
 
-# Docker
+# ──────────────────────────── Logs / Docker runtime ────────────────────────────
+# Root-level and recursive logs from prior sessions / CI runs.
+*.log
 **/*.log
 
+# ──────────────────────────── Bot / hardware runtime state ────────────────────────────
+# Discord bot runtime state
+.alert_watcher_state.json
+discord_bot/.alert_watcher_state.json
 # Wokwi – never auto-generate this file
 wokwi.json
 wokwi.diagram.json

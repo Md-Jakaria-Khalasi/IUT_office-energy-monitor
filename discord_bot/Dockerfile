@@ -16,7 +16,12 @@ RUN pip install -r /app/requirements.txt
 
 COPY discord_bot/app /app/app
 
+# Drop privileges for runtime. The image uses root to install deps; switch
+# to a non-root user once everything is in place.
+RUN useradd --create-home --shell /bin/bash bot
+USER bot
+
 HEALTHCHECK --interval=60s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -fsS http://localhost:8000/healthz || exit 0
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://backend:8000/healthz',timeout=3).status==200 else 1)" || exit 0
 
 CMD ["python", "-m", "app.bot"]

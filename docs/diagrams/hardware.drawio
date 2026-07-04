@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-04T16:30:00.000Z" agent="placeholder" version="24.0.0" type="device">
+  <diagram name="Hardware Schematic" id="hardware-schematic">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="title" value="Office Energy Monitor — Hardware Schematic (per room)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="mains" value="AC Mains&#xa;(230 V)" style="shape=cloud;whiteSpace=wrap;html=1;rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="60" y="160" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="hlk" value="HLK-PM01&#xa;AC → 5V DC" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="240" y="160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lvl" value="Level shifter&#xa;5V ↔ 3.3V" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="240" y="230" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="esp32" value="ESP32-WROOM-32&#xa;GPIO 25/26/27/32/33&#xa;ACS712 on GPIO 34 (ADC)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="420" y="180" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="relay1" value="Relay 1&#xa;(Fan 1)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="100" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="relay2" value="Relay 2&#xa;(Fan 2)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="160" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="relay3" value="Relay 3&#xa;(Light 1)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="220" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="relay4" value="Relay 4&#xa;(Light 2)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="280" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="relay5" value="Relay 5&#xa;(Light 3)" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="340" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="acs" value="ACS712-20A&#xa;current sensor" style="shape=rectangle;whiteSpace=wrap;html=1;rounded=0;fillColor=#e1d5e7;strokeColor=#9673a4;" vertex="1" parent="1">
+          <mxGeometry x="420" y="340" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="router" value="Wi-Fi router&#xa;── HTTP POST /devices/{id}/telemetry" style="shape=cloud;whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="420" y="450" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="FastAPI backend&#xa;(same REST + WS contract)" style="shape=cloud;whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="680" y="450" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="ESP32 in each of 3 rooms (Drawing, Work Room 1, Work Room 2) drives 5 SPST relays + ACS712.&#xa;Telemetry POSTs land on the same backend the simulator normally uses — drop-in replacement." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="900" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="1" parent="1" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
