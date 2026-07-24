@@ -608,6 +608,9 @@ Hits `/health`, `/api/v1/rooms/`, `/api/v1/devices/`,
 
 ---
 
+## Project Demo On Youtube 
+Link > https://youtu.be/vgd3OltJ69Q?si=XBC9C1QYqjSL1kGp
+
 ## 📝 License
 
 MIT — see [`LICENSE`](./LICENSE).
